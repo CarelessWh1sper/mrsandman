@@ -1,0 +1,30 @@
+{% extends 'chat/base.html' %}
+
+{% block title %}Topics | Mr. Sandman{% endblock %}
+
+{% block content %}
+<main class="auth-wrap">
+    <div class="hub-panel hub-panel--page">
+        <div class="hub-bar">
+            <div>
+                <h2>Topics</h2>
+                <div class="hub-sub">See a topic's rooms from tonight or from earlier nights.</div>
+            </div>
+        </div>
+        <form class="hub-search" method="get">
+            <input class="Boxinput" type="search" name="q" value="{{ q }}" placeholder="Search topics" aria-label="Search topics">
+        </form>
+        {% for t in topics %}
+            <div class="hub-topic hub-topic--row">
+                <span>{{ t.name }}</span>
+                <span class="hub-links">
+                    <a href="{% url 'chat:home' %}?q={{ t.name|urlencode }}">{{ t.tonight_count }} tonight</a>
+                    <a href="{% url 'chat:archive' %}?q={{ t.name|urlencode }}">{{ t.earlier_count }} earlier</a>
+                </span>
+            </div>
+        {% empty %}
+            <div class="hub-dim">No topics match.</div>
+        {% endfor %}
+    </div>
+</main>
+{% endblock %}

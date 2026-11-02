@@ -1,0 +1,42 @@
+{% extends 'chat/base.html' %}
+
+{% block title %}Tonight | Mr. Sandman{% endblock %}
+
+{% block content %}
+<main class="hub">
+    {% include 'chat/_topics_panel.html' %}
+
+    <section class="hub-center">
+        <div class="hub-bar">
+            <div>
+                <h2>Tonight</h2>
+                <div class="hub-sub">{{ rooms_count }} room{{ rooms_count|pluralize }} since {{ start|date:"l g:i A" }}{% if q %} matching "{{ q }}"{% endif %}</div>
+            </div>
+            <a class="hub-cta" href="{% url 'chat:create_room' %}">Create room</a>
+        </div>
+
+        <form class="hub-search" method="get" action="{% url 'chat:home' %}">
+            <input class="Boxinput" type="search" name="q" value="{{ q }}" placeholder="Search tonight's rooms or topics" aria-label="Search tonight's rooms or topics">
+        </form>
+
+        {% for room in rooms %}
+            {% include 'chat/_room_card.html' %}
+        {% empty %}
+            <div class="chat-empty">
+                No rooms yet tonight. Be the first to say what's keeping you up,
+                or <a href="{% url 'chat:archive' %}">look through the archive</a>.
+            </div>
+        {% endfor %}
+    </section>
+
+    <aside class="hub-panel">
+        <h3>Tonight's activity</h3>
+        {% for m in recent_messages %}
+            {% include 'chat/_activity_item.html' %}
+        {% empty %}
+            <div class="hub-dim">No messages yet tonight.</div>
+        {% endfor %}
+        <a class="hub-more" href="{% url 'chat:activity' %}">See all of tonight's activity</a>
+    </aside>
+</main>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'chat/base.html' %}
+
+{% block title %}{% if past %}Earlier activity{% else %}Tonight's activity{% endif %} | Mr. Sandman{% endblock %}
+
+{% block content %}
+<main class="auth-wrap">
+    <div class="hub-panel hub-panel--page">
+        <div class="hub-bar">
+            <div>
+                <h2>{% if past %}Earlier activity{% else %}Tonight's activity{% endif %}</h2>
+                <div class="hub-sub">{% if past %}Messages from past nights.{% else %}Messages sent since tonight began.{% endif %}</div>
+            </div>
+            {% if past %}
+                <a class="hub-cta" href="{% url 'chat:activity' %}">Tonight</a>
+            {% else %}
+                <a class="hub-cta" href="{% url 'chat:activity' %}?when=past">Earlier nights</a>
+            {% endif %}
+        </div>
+        {% for m in recent_messages %}
+            {% include 'chat/_activity_item.html' %}
+        {% empty %}
+            <div class="hub-dim">Nothing here yet.</div>
+        {% endfor %}
+    </div>
+</main>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'chat/base.html' %}
+
+{% block title %}Chat | Mr. Sandman{% endblock %}
+
+{% block content %}
+<main class="chat-app">
+    <div class="chat-card chat-card--list">
+        <div class="chat-head">
+            <div>
+                <h2>Rooms</h2>
+                <div class="chat-sub">Pick a room and say what's keeping you up.</div>
+            </div>
+        </div>
+        <div class="chat-rooms">
+            {% for room in rooms %}
+                <a class="chat-room-link" href="{% url 'chat:room' room.slug %}">
+                    <span>{{ room.name }}</span>
+                    <span class="chat-room-count">{{ room.messages.count }} message{{ room.messages.count|pluralize }}</span>
+                </a>
+            {% empty %}
+                <div class="chat-empty">No rooms yet.</div>
+            {% endfor %}
+        </div>
+    </div>
+</main>
+{% endblock %}

@@ -1,0 +1,8 @@
+<aside class="hub-panel">
+    <h3>{{ panel_title }}</h3>
+    <a class="hub-topic{% if not q and not no_active %} on{% endif %}" href="{% url panel_url %}"><span>All</span><span class="hub-dim">{{ all_count }}</span></a>
+    {% for t in topics %}
+        <a class="hub-topic{% if q == t.name %} on{% endif %}" href="{% url panel_url %}?q={{ t.name|urlencode }}"><span>{{ t.name }}</span><span class="hub-dim">{{ t.room_count }}</span></a>
+    {% endfor %}
+    <a class="hub-more" href="{% url 'chat:topics' %}">More topics</a>
+</aside>

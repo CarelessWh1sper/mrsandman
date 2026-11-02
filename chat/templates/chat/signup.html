@@ -1,0 +1,27 @@
+{% extends 'chat/base.html' %}
+
+{% block title %}Join | Mr. Sandman{% endblock %}
+
+{% block content %}
+<main class="auth-wrap">
+    <form class="auth-card auth-card--wide auth-card--join" method="post" novalidate>
+        {% csrf_token %}
+        <div class="BoxFirst">
+            <h1>Mr. Sandman</h1>
+            <span>Pick a username and a password. That's all you need to join the chat.</span>
+        </div>
+
+        {% for field in form %}
+            <div class="email">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% for e in field.errors %}<span class="auth-error">{{ e }}</span>{% endfor %}
+            </div>
+        {% endfor %}
+
+        <button class="ButtonSubmitSign" type="submit">Create account</button>
+
+        <p class="foot">Already have an account? <a href="{% url 'chat:login' %}">Sign in</a></p>
+    </form>
+</main>
+{% endblock %}

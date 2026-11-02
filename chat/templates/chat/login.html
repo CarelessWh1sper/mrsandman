@@ -1,0 +1,33 @@
+{% extends 'chat/base.html' %}
+
+{% block title %}Sign in | Mr. Sandman{% endblock %}
+
+{% block content %}
+<main class="auth-wrap">
+    <form class="auth-card" method="post">
+        {% csrf_token %}
+        <div class="BoxFirst">
+            <h1>Mr. Sandman</h1>
+            <span>Welcome back. It's late. Let's get you in.</span>
+        </div>
+
+        {% if form.non_field_errors %}
+            {% for e in form.non_field_errors %}<span class="auth-error">{{ e }}</span>{% endfor %}
+        {% endif %}
+
+        {% for field in form %}
+            <div class="email">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% for e in field.errors %}<span class="auth-error">{{ e }}</span>{% endfor %}
+            </div>
+        {% endfor %}
+
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+        <button class="ButtonSubmitSign" type="submit">Sign in</button>
+
+        <p class="foot">New here? <a href="{% url 'chat:signup' %}">Create an account</a></p>
+    </form>
+</main>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'chat/base.html' %}
+
+{% block title %}Edit message | Mr. Sandman{% endblock %}
+
+{% block content %}
+<main class="auth-wrap">
+    <form class="auth-card auth-card--wide" method="post">
+        {% csrf_token %}
+        <div class="BoxFirst">
+            <h1>Edit message</h1>
+            <span>in {{ room.name }}</span>
+        </div>
+
+        {% include 'chat/_form_fields.html' %}
+
+        <button class="ButtonSubmitSign" type="submit">Save message</button>
+        <a class="auth-cancel" href="{% url 'chat:room' room.pk %}">Cancel</a>
+    </form>
+</main>
+{% endblock %}

@@ -1,0 +1,211 @@
+{% extends 'chat/base.html' %}
+
+{% block title %}{{ room.name }} | Mr. Sandman{% endblock %}
+
+{% block content %}
+<main class="hub hub--room">
+    <section class="hub-center">
+        <div class="chat-card" id="chatCard">
+            <div class="chat-head">
+                <div>
+                    <h2>{{ room.name }}</h2>
+                    <div class="chat-sub"><span class="chat-dot"></span><span id="chatStatus">Connecting…</span>{% if is_past %}<span class="hub-dim"> · from an earlier night</span>{% endif %}</div>
+                </div>
+                <div class="hub-actions">
+                    {% if request.user == room.host %}
+                        <a href="{% url 'chat:update_room' room.pk %}">Edit</a>
+                        <a href="{% url 'chat:delete_room' room.pk %}">Delete</a>
+                    {% endif %}
+                    <a class="chat-back" href="{% if is_past %}{% url 'chat:archive' %}{% else %}{% url 'chat:home' %}{% endif %}">{% if is_past %}Archive{% else %}Tonight{% endif %}</a>
+                </div>
+            </div>
+
+            {% if room.description %}<div class="chat-about">{{ room.description }}</div>{% endif %}
+
+            <div class="chat-log" id="chatLog" aria-live="polite">
+                {% for m in chat_messages %}
+                    <div class="chat-msg{% if m.user_id == request.user.id %} mine{% endif %}" data-id="{{ m.pk }}">
+                        <div class="chat-meta">
+                            {% if m.user_id != request.user.id %}<a class="chat-name" href="{% url 'chat:profile' m.user_id %}">{{ m.user.username }}</a>{% endif %}
+                            <time datetime="{{ m.created|date:'c' }}"></time>
+                            {% if m.edited %}<span class="chat-edited">edited</span>{% endif %}
+                            {% if m.user_id == request.user.id %}
+                                <span class="chat-tools">
+                                    <a href="{% url 'chat:edit_message' m.pk %}">Edit</a>
+                                    <a href="{% url 'chat:delete_message' m.pk %}">Delete</a>
+                                </span>
+                            {% endif %}
+                        </div>
+                        <div class="chat-bubble">{{ m.body }}</div>
+                    </div>
+                {% empty %}
+                    <div class="chat-empty" id="chatEmpty">Nobody has said anything here yet. Go first.</div>
+                {% endfor %}
+            </div>
+
+            {% if user.is_authenticated %}
+                <form class="chat-form" id="chatForm" autocomplete="off">
+                    <input class="Boxinput" id="chatInput" type="text" maxlength="500"
+                           placeholder="Write something…" aria-label="Message" disabled>
+                    <button class="ButtonSubmitSign" id="chatSend" type="submit" disabled>Send</button>
+                </form>
+            {% else %}
+                <div class="chat-signin">
+                    <a href="{% url 'chat:login' %}?next={{ request.path|urlencode }}">Sign in</a> or
+                    <a href="{% url 'chat:signup' %}">join</a> to take part in this room.
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <aside class="hub-panel">
+        {% if room.host %}
+            <h3>Host</h3>
+            <a class="hub-person" href="{% url 'chat:profile' room.host.pk %}">@{{ room.host.username }}</a>
+        {% endif %}
+        {% if room.topic %}
+            <h3>Topic</h3>
+            <div><a class="hub-pill" href="{% url 'chat:topics' %}?q={{ room.topic.name|urlencode }}">{{ room.topic.name }}</a></div>
+        {% endif %}
+        <h3>Participants (<span id="partCount">{{ participants|length }}</span>)</h3>
+        <div id="partList">
+            {% for p in participants %}
+                <a class="hub-person" data-user="{{ p.pk }}" href="{% url 'chat:profile' p.pk %}">@{{ p.username }}</a>
+            {% empty %}
+                <div class="hub-dim" id="partEmpty">No one has posted yet.</div>
+            {% endfor %}
+        </div>
+    </aside>
+</main>
+{{ request.user.id|json_script:'me' }}
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    const roomId = {{ room.pk }};
+    const me = JSON.parse(document.getElementById('me').textContent);  
+    const EDIT_URL = "{% url 'chat:edit_message' 0 %}";
+    const DELETE_URL = "{% url 'chat:delete_message' 0 %}";
+    const PROFILE_URL = "{% url 'chat:profile' 0 %}";
+    const withId = (tpl, id) => tpl.replace('/0/', '/' + id + '/');
+
+    const log = document.getElementById('chatLog');
+    const card = document.getElementById('chatCard');
+    const form = document.getElementById('chatForm');          
+    const input = document.getElementById('chatInput');
+    const send = document.getElementById('chatSend');
+    const status = document.getElementById('chatStatus');
+    const partList = document.getElementById('partList');
+    const partCount = document.getElementById('partCount');
+
+    const fmtTime = iso => {
+        const d = new Date(iso);
+        return isNaN(d) ? '' : d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
+    log.querySelectorAll('time').forEach(t => { t.textContent = fmtTime(t.getAttribute('datetime')); });
+
+    const nearBottom = () => log.scrollHeight - log.scrollTop - log.clientHeight < 120;
+    const toBottom = () => { log.scrollTop = log.scrollHeight; };
+
+    function el(tag, className, text) {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (text !== undefined) node.textContent = text;
+        return node;
+    }
+
+    function link(className, href, text) {
+        const a = el('a', className, text);
+        a.href = href;
+        return a;
+    }
+
+    function addParticipant(data) {
+        if (partList.querySelector('[data-user="' + data.user_id + '"]')) return;
+        const empty = document.getElementById('partEmpty');
+        if (empty) empty.remove();
+        const a = link('hub-person', withId(PROFILE_URL, data.user_id), '@' + data.username);
+        a.dataset.user = data.user_id;
+        partList.appendChild(a);
+        partCount.textContent = partList.querySelectorAll('[data-user]').length;
+    }
+
+    function addMessage(data) {
+        const empty = document.getElementById('chatEmpty');
+        if (empty) empty.remove();
+
+        const mine = me !== null && data.user_id === me;
+        const stick = mine || nearBottom();
+
+        const row = el('div', 'chat-msg' + (mine ? ' mine' : ''));
+        row.dataset.id = data.id;
+
+        const meta = el('div', 'chat-meta');
+        if (!mine) {
+            meta.appendChild(link('chat-name', withId(PROFILE_URL, data.user_id), data.username));
+            meta.appendChild(document.createTextNode(' '));
+        }
+        const time = el('time', '', fmtTime(data.time));
+        time.setAttribute('datetime', data.time);
+        meta.appendChild(time);
+        if (mine) {
+            const tools = el('span', 'chat-tools');
+            tools.appendChild(link('', withId(EDIT_URL, data.id), 'Edit'));
+            tools.appendChild(link('', withId(DELETE_URL, data.id), 'Delete'));
+            meta.appendChild(tools);
+        }
+
+        row.appendChild(meta);
+        row.appendChild(el('div', 'chat-bubble', data.body));
+        log.appendChild(row);
+
+        addParticipant(data);
+        if (stick) toBottom();
+    }
+
+    function setOnline(online, text) {
+        card.classList.toggle('is-online', online);
+        status.textContent = text;
+        if (form) {
+            input.disabled = !online;
+            send.disabled = !online;
+            if (online) input.focus();
+        }
+    }
+
+    let socket = null;
+    let retry = 0;
+
+    function connect() {
+        const scheme = location.protocol === 'https:' ? 'wss' : 'ws';
+        socket = new WebSocket(scheme + '://' + location.host + '/ws/chat/' + roomId + '/');
+
+        socket.onopen = () => { retry = 0; setOnline(true, 'Live'); };
+
+        socket.onmessage = e => {
+            try { addMessage(JSON.parse(e.data)); } catch (err) { /* ignore bad frames */ }
+        };
+
+        socket.onclose = e => {
+            if (e.code === 4404) { setOnline(false, 'This room no longer exists'); return; }
+            setOnline(false, 'Reconnecting…');
+            setTimeout(connect, Math.min(1000 * 2 ** retry++, 15000));
+        };
+    }
+
+    if (form) {
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            const text = input.value.trim();
+            if (!text || !socket || socket.readyState !== WebSocket.OPEN) return;
+            socket.send(JSON.stringify({ message: text }));
+            input.value = '';
+        });
+    }
+
+    toBottom();
+    connect();
+})();
+</script>
+{% endblock %}

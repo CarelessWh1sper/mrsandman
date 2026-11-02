@@ -1,0 +1,21 @@
+{% extends 'chat/base.html' %}
+
+{% block title %}{{ heading }} | Mr. Sandman{% endblock %}
+
+{% block content %}
+<main class="auth-wrap">
+    <form class="auth-card auth-card--wide" method="post">
+        {% csrf_token %}
+        <div class="BoxFirst"><h1>{{ heading }}</h1></div>
+
+        {% include 'chat/_form_fields.html' %}
+
+        <datalist id="topic-list">
+            {% for t in topics %}<option value="{{ t.name }}">{% endfor %}
+        </datalist>
+
+        <button class="ButtonSubmitSign" type="submit">Save room</button>
+        <a class="auth-cancel" href="{% url cancel_url %}">Cancel</a>
+    </form>
+</main>
+{% endblock %}

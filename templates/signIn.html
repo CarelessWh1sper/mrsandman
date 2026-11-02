@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in | Mr. Sandman</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+ </head>
+
+<body>
+    <div class="sky"></div>
+
+    <div class="BoxSign"> 
+
+        <div class="BoxFirst">
+            <h1>mr. Sandman</h1>
+            <span>Welcome back. It's late — let's get you in.</span>
+        </div>
+
+        <div class="email">
+            <span>email</span>
+            <input class="Boxinput" type="text" placeholder="you@example.com">
+        </div>
+
+        <div class="email">
+            <label>password</label>
+            <input class="Boxinput" type="password" placeholder="••••••••••">
+        </div>
+
+        <div class="BoxRememmber">
+           <label for="">
+                <input type="checkbox" name="" id="">
+                remember me
+           </label>
+
+           <a href="">forgot password?</a>
+        </div>
+
+        <div>
+            <button class="ButtonSubmitSign">Sign in</button>
+        </div>
+
+        <div class="divider">
+            <span>or continue with</span>
+        </div>
+
+        <button class="alt">Continue with Google</button>
+        <button class="alt">Continue with Apple</button>
+
+        <p class="foot">New here? <a href="#">Create an account</a></p>
+
+    </div>
+
+    
+</body>
+</html>

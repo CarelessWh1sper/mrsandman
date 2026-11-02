@@ -1,0 +1,9 @@
+{% for e in form.non_field_errors %}<span class="auth-error">{{ e }}</span>{% endfor %}
+{% for field in form %}
+    <div class="email">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text and field.name == 'topic' %}<span class="hub-dim">{{ field.help_text }}</span>{% endif %}
+        {% for e in field.errors %}<span class="auth-error">{{ e }}</span>{% endfor %}
+    </div>
+{% endfor %}

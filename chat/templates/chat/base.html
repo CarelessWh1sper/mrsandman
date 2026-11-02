@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mr. Sandman{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/chat.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+</head>
+<body>
+    <div class="sky"></div>
+    <header class="navFirst">
+        <nav>
+            <a class="chat-brand" href="{% url 'home' %}"><span style="font-family:'asli'; font-size:25px;">Mr. Sandman</span></a>
+        </nav>
+        <input type="checkbox" id="navToggle" class="nav-check" aria-label="Toggle menu">
+        <label for="navToggle" class="nav-toggle" aria-hidden="true"><span></span></label>
+
+
+        <nav class="navSec">
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'chat:home' %}">Tonight</a>
+            <a href="{% url 'chat:archive' %}">Archive</a>
+            <a href="{% url 'about' %}">About</a>
+            
+        </nav>
+
+        <nav class="navThird">
+            {% if user.is_authenticated %}
+                <a class="chat-who" href="{% url 'chat:profile' user.pk %}">{{ user.username }}</a>
+                <form method="post" action="{% url 'chat:logout' %}" class="chat-logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="chat-logout">Log out</button>
+                </form>
+            {% else %}
+                <a href="{% url 'chat:login' %}" class="sign">Sign in</a>
+                <a href="{% url 'chat:signup' %}" class="join">Join</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    {% block content %}{% endblock %}
+    {% block scripts %}{% endblock %}
+</body>
+</html>

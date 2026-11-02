@@ -1,0 +1,21 @@
+{% extends 'chat/base.html' %}
+
+{% block title %}Delete | Mr. Sandman{% endblock %}
+
+{% block content %}
+<main class="auth-wrap">
+    <form class="auth-card" method="post">
+        {% csrf_token %}
+        <div class="BoxFirst">
+            <h1>Delete?</h1>
+            <span>You are about to delete {{ label }}. This can't be undone.</span>
+        </div>
+        <button class="ButtonSubmitSign chat-danger" type="submit">Yes, delete</button>
+        {% if cancel_pk %}
+            <a class="auth-cancel" href="{% url cancel_url cancel_pk %}">Cancel</a>
+        {% else %}
+            <a class="auth-cancel" href="{% url cancel_url %}">Cancel</a>
+        {% endif %}
+    </form>
+</main>
+{% endblock %}

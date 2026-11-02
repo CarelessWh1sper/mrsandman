@@ -1,0 +1,45 @@
+{% extends 'chat/base.html' %}
+
+{% block title %}Archive | Mr. Sandman{% endblock %}
+
+{% block content %}
+<main class="hub">
+    {% include 'chat/_topics_panel.html' %}
+
+    <section class="hub-center">
+        <div class="hub-bar">
+            <div>
+                <h2>Archive</h2>
+                <div class="hub-sub">{{ rooms_count }} room{{ rooms_count|pluralize }} from earlier nights{% if q %} matching "{{ q }}"{% endif %}</div>
+            </div>
+            <a class="hub-cta" href="{% url 'chat:home' %}">Back to tonight</a>
+        </div>
+
+        <form class="hub-search" method="get" action="{% url 'chat:archive' %}">
+            <input class="Boxinput" type="search" name="q" value="{{ q }}" placeholder="Search the archive" aria-label="Search the archive">
+        </form>
+
+        {% for night in nights %}
+            <div class="hub-night">
+                <h3>{{ night.date|date:"l, F j" }}</h3>
+                <span class="hub-dim">{{ night.rooms|length }} room{{ night.rooms|length|pluralize }}</span>
+            </div>
+            {% for room in night.rooms %}
+                {% include 'chat/_room_card.html' %}
+            {% endfor %}
+        {% empty %}
+            <div class="chat-empty">Nothing in the archive yet. Rooms from earlier nights will appear here.</div>
+        {% endfor %}
+    </section>
+
+    <aside class="hub-panel">
+        <h3>Earlier messages</h3>
+        {% for m in past_messages %}
+            {% include 'chat/_activity_item.html' %}
+        {% empty %}
+            <div class="hub-dim">No earlier messages yet.</div>
+        {% endfor %}
+        <a class="hub-more" href="{% url 'chat:activity' %}?when=past">See all earlier activity</a>
+    </aside>
+</main>
+{% endblock %}

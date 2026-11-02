@@ -1,0 +1,8 @@
+<div class="hub-act">
+    <div class="hub-act-meta">
+        <a class="hub-user" href="{% url 'chat:profile' m.user.pk %}">@{{ m.user.username }}</a>
+        <span class="hub-dim">{{ m.created|timesince }} ago</span>
+    </div>
+    <div class="hub-act-room">in <a href="{% url 'chat:room' m.room.pk %}">{{ m.room.name }}</a></div>
+    <div class="hub-act-body">{{ m.body|truncatechars:90 }}</div>
+</div>

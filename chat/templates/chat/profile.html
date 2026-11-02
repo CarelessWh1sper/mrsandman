@@ -1,0 +1,36 @@
+{% extends 'chat/base.html' %}
+
+{% block title %}@{{ profile_user.username }} | Mr. Sandman{% endblock %}
+
+{% block content %}
+<main class="hub">
+    {% include 'chat/_topics_panel.html' %}
+
+    <section class="hub-center">
+        <div class="hub-bar">
+            <div>
+                <h2>@{{ profile_user.username }}</h2>
+                <div class="hub-sub">Joined {{ profile_user.date_joined|timesince }} ago · {{ rooms|length }} room{{ rooms|length|pluralize }} hosted</div>
+            </div>
+            {% if request.user == profile_user %}
+                <a class="hub-cta" href="{% url 'chat:edit_profile' %}">Edit profile</a>
+            {% endif %}
+        </div>
+
+        {% for room in rooms %}
+            {% include 'chat/_room_card.html' %}
+        {% empty %}
+            <div class="chat-empty">@{{ profile_user.username }} hasn't hosted a room yet.</div>
+        {% endfor %}
+    </section>
+
+    <aside class="hub-panel">
+        <h3>Recent messages</h3>
+        {% for m in recent_messages %}
+            {% include 'chat/_activity_item.html' %}
+        {% empty %}
+            <div class="hub-dim">No messages yet.</div>
+        {% endfor %}
+    </aside>
+</main>
+{% endblock %}
